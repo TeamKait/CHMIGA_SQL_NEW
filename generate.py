@@ -65,7 +65,7 @@ def add_task_request(folder):
     else:
         request_num = 1
 
-    request_content = colored_input("Введите содержание запроса: ")
+    request_content = multi_input("Введите содержание запроса: ")
     
     with open(file_path, mode, encoding='utf-8') as f:
         if mode == 'a' and os.path.getsize(file_path) > 0:
