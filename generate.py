@@ -3,10 +3,12 @@ from datetime import datetime
 import os
 from menu import Menu
 import sys
+import subprocess
 
 init()
 
 # Глобальная переменная для хранения текущей папки
+print(datetime.now().strftime("%Y-%m-%d"))
 current_folder = os.path.join("sql", datetime.now().strftime("%Y-%m-%d"))
 
 def colored_input(prompt, color=Color.LIGHTMAGENTA_EX):
@@ -83,12 +85,24 @@ def select_folder():
     os.system('cls' if os.name == 'nt' else 'clear')
     print(Color.CYAN + f'Текущая папка изменена на: {current_folder}\n')
 
+def update_git():
+    print(Color.CYAN + "git add .")
+    subprocess.run(["git", "add", "."], check=True)
+
+    print(Color.CYAN + f"git commit -m {datetime.now().strftime("%Y-%m-%d")}")
+    subprocess.run(["git","commit", "-m", datetime.now().strftime("%Y-%m-%d")], check=True)
+
+    print(Color.CYAN + "git push origin main")
+    subprocess.run(["git", "push", "origin", "main"], check=True)
+
+
 if __name__ == "__main__":
     os.system('cls' if os.name == 'nt' else 'clear')
     menu = Menu("Выберите действие", True)
     menu.AddUpdateOption("Добавить запрос", lambda: add_task_request(current_folder))
     menu.AddUpdateOption("Выбрать папку", select_folder)
     menu.AddUpdateOption("Создать/обновить таблицу", lambda: create_table_file(current_folder))
+    menu.AddUpdateOption("Обновить git", update_git)
     menu.AddUpdateOption("Выйти", lambda: exit())
     while True:
         menu.Show()
