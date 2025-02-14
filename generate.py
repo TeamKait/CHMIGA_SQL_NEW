@@ -7,7 +7,6 @@ import subprocess
 
 init()
 
-# Глобальная переменная для хранения текущей папки
 print(datetime.now().strftime("%Y-%m-%d"))
 current_folder = os.path.join("sql", datetime.now().strftime("%Y-%m-%d"))
 
