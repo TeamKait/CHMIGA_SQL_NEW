@@ -127,29 +127,34 @@ def select_folder():
     ensure_folder_exists(current_folder)
     os.system('cls' if os.name == 'nt' else 'clear')
     print(Color.CYAN + f'Текущая папка изменена на: {current_folder}\n')
-    generate_aggregate_file(current_folder)
 
 def update_git():
     generate_aggregate_file(current_folder)
-
-    # Попросим пользователя ввести токен, если это не настроено
     github_token = colored_input("Введите ваш GitHub-токен: ").strip()
 
-    # Убедимся, что удалённый URL настроен на HTTPS
-    subprocess.run(["git", "remote", "set-url", "origin", f"https://{github_token}@github.com/TeamKait/CHMIGA_SQL_NEW.git"], check=True)
+    try:
+        # Обновляем URL удалённого репозитория для использования токена.
+        # Замените <ваш_репозиторий> на корректный адрес, например: username/repository.
+        subprocess.run([
+            "git", "remote", "set-url", "origin",
+            f"https://{github_token}@github.com/TeamKait/CHMIGA_SQL_NEW.git"
+        ], check=True)
 
-    print("\n" + Color.MAGENTA + "git add ." + Color.LIGHTBLACK_EX)
-    subprocess.run(["git", "add", "."], check=True)
+        print("\n" + Color.MAGENTA + "git add ." + Color.LIGHTBLACK_EX)
+        subprocess.run(["git", "add", "."], check=True)
 
-    commit_message = datetime.now().strftime('%Y-%m-%d')
-    print(Color.MAGENTA + f"git commit -m '{commit_message}'" + Color.LIGHTBLACK_EX)
-    subprocess.run(["git", "commit", "-m", commit_message], check=True)
+        commit_message = datetime.now().strftime('%Y-%m-%d')
+        print(Color.MAGENTA + f"git commit -m '{commit_message}'" + Color.LIGHTBLACK_EX)
+        subprocess.run(["git", "commit", "-m", commit_message], check=True)
 
-    print(Color.MAGENTA + "git push origin main" + Color.LIGHTBLACK_EX)
-    subprocess.run(["git", "push", "origin", "main"], check=True)
-    print(Color.CYAN + "Git обновлён.")
-    exit()
+        print(Color.MAGENTA + "git push origin main" + Color.LIGHTBLACK_EX)
+        subprocess.run(["git", "push", "origin", "main"], check=True)
 
+        print(Color.CYAN + "Git обновлён.")
+        exit()
+    except subprocess.CalledProcessError:
+        print(Color.RED + "Ошибка при выполнении git команды. Проверьте введённый токен." + Color.RESET)
+        exit()
 
 def aggregate():
     generate_aggregate_file(current_folder)
