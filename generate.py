@@ -94,6 +94,7 @@ def update_git():
 
     print(Color.CYAN + "git push origin main")
     subprocess.run(["git", "push", "origin", "main"], check=True)
+    exit()
 
 
 if __name__ == "__main__":
