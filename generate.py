@@ -86,13 +86,13 @@ def select_folder():
     print(Color.CYAN + f'Текущая папка изменена на: {current_folder}\n')
 
 def update_git():
-    print(Color.CYAN + "git add .")
+    print(Color.RED + "git add .")
     subprocess.run(["git", "add", "."], check=True)
 
-    print(Color.CYAN + f"git commit -m {datetime.now().strftime("%Y-%m-%d")}")
+    print(Color.RED + f"git commit -m {datetime.now().strftime("%Y-%m-%d")}")
     subprocess.run(["git","commit", "-m", str(datetime.now().strftime("%Y-%m-%d"))], check=True)
 
-    print(Color.CYAN + "git push origin main")
+    print(Color.RED + "git push origin main")
     subprocess.run(["git", "push", "origin", "main"], check=True)
     exit()
 
