@@ -136,7 +136,7 @@ def update_git():
     github_token = colored_input("Введите ваш GitHub-токен: ").strip()
 
     # Убедимся, что удалённый URL настроен на HTTPS
-    subprocess.run(["git", "remote", "set-url", "origin", f"https://{github_token}@github.com/CHMIGA_SQL_NEW"], check=True)
+    subprocess.run(["git", "remote", "set-url", "origin", f"https://{github_token}@github.com/TeamKait/CHMIGA_SQL_NEW.git"], check=True)
 
     print("\n" + Color.MAGENTA + "git add ." + Color.LIGHTBLACK_EX)
     subprocess.run(["git", "add", "."], check=True)
