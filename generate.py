@@ -131,6 +131,13 @@ def select_folder():
 
 def update_git():
     generate_aggregate_file(current_folder)
+
+    # Попросим пользователя ввести токен, если это не настроено
+    github_token = colored_input("Введите ваш GitHub-токен: ").strip()
+
+    # Убедимся, что удалённый URL настроен на HTTPS
+    subprocess.run(["git", "remote", "set-url", "origin", f"https://{github_token}@github.com/CHMIGA_SQL_NEW.git"], check=True)
+
     print("\n" + Color.MAGENTA + "git add ." + Color.LIGHTBLACK_EX)
     subprocess.run(["git", "add", "."], check=True)
 
@@ -142,6 +149,7 @@ def update_git():
     subprocess.run(["git", "push", "origin", "main"], check=True)
     print(Color.CYAN + "Git обновлён.")
     exit()
+
 
 def aggregate():
     generate_aggregate_file(current_folder)
