@@ -22,7 +22,7 @@ def multi_input(prompt, color=Color.LIGHTMAGENTA_EX):
         lines.append(sqlparse.format(
             line,
             keyword_case="upper",
-            reindent=True,
+            reindent=False,
             encoding="utf-8"
         ))
     return '\n'.join(lines)
