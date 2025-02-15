@@ -135,7 +135,6 @@ def select_folder():
     menu.SetLabel(folder_name)
 
 def update_git():
-    generate_aggregate_file(current_folder)
     github_token = colored_input("Введите ваш GitHub-токен: ").strip()
 
     try:
