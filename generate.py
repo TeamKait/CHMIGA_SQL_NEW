@@ -47,7 +47,7 @@ def generate_aggregate_file(folder):
     и всех файлов с запросами (название которых начинается с "Задание #")
     """
     ensure_folder_exists(folder)
-    aggregate_path = os.path.join(folder, "Общий файл.md")
+    aggregate_path = os.path.join(folder, "~Общий файл.md")
     aggregate_content = ""
 
     structure_file = os.path.join(folder, "Создание таблицы.md")
