@@ -1,13 +1,16 @@
 from colorama import Fore as Color
 
 class Menu:
-    __name__:str
+    __label__:str
     __options__ = {}
     __repeat__ = False
     
-    def __init__(self, name, repeat_menu_if_error):
-        self.__name__ = f"{Color.LIGHTRED_EX}--=+=-- {name} --=+=--"
+    def __init__(self, label, repeat_menu_if_error):
+        self.SetLabel(label)
         self.__repeat__ = repeat_menu_if_error
+    
+    def SetLabel(self, label):
+        self.__label__ = f"{Color.LIGHTRED_EX}--=+=-- {label} --=+=--"
     
     # Add option to the menu
     def AddUpdateOption(self, name, action):
@@ -30,7 +33,7 @@ class Menu:
         # showing options
         keys = list(self.__options__.keys())
         
-        print(self.__name__)
+        print(self.__label__)
         for b in keys:
             print(f"{Color.CYAN}{keys.index(b) + 1}. {Color.LIGHTMAGENTA_EX}{b}{Color.WHITE}")
         print()

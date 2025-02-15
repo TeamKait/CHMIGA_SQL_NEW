@@ -5,6 +5,7 @@ import sys
 import subprocess
 import re
 from menu import Menu
+import sqlparse
 
 init()
 
@@ -18,7 +19,12 @@ def multi_input(prompt, color=Color.LIGHTMAGENTA_EX):
         line = sys.stdin.readline().rstrip('\n')
         if not line:
             break
-        lines.append(line)
+        lines.append(sqlparse.format(
+            line,
+            keyword_case="upper",
+            reindent=True,
+            encoding="utf-8"
+        ))
     return '\n'.join(lines)
 
 def ensure_folder_exists(folder):
@@ -126,7 +132,7 @@ def select_folder():
     current_folder = os.path.join("sql", folder_name)
     ensure_folder_exists(current_folder)
     os.system('cls' if os.name == 'nt' else 'clear')
-    print(Color.CYAN + f'Текущая папка изменена на: {current_folder}\n')
+    menu.SetLabel(folder_name)
 
 def update_git():
     generate_aggregate_file(current_folder)
@@ -155,16 +161,14 @@ def update_git():
     except subprocess.CalledProcessError:
         print(Color.RED + "Ошибка при выполнении git команды. Проверьте введённый токен." + Color.RESET)
         exit()
-
+    
 def aggregate():
     generate_aggregate_file(current_folder)
     exit()
 
+menu = Menu(str(datetime.now().strftime("%Y-%m-%d")), True)
 if __name__ == "__main__":
     current_folder = os.path.join("sql", datetime.now().strftime("%Y-%m-%d"))
-    ensure_folder_exists(current_folder)
-    os.system('cls' if os.name == 'nt' else 'clear')
-    menu = Menu("Выберите действие", True)
     menu.AddUpdateOption("Добавить запрос", lambda: add_task_request(current_folder))
     menu.AddUpdateOption("Выбрать папку", select_folder)
     menu.AddUpdateOption("Создать/обновить таблицу", lambda: create_table_file(current_folder))
@@ -172,4 +176,5 @@ if __name__ == "__main__":
     menu.AddUpdateOption("Обновить git", update_git)
     menu.AddUpdateOption("Выйти", lambda: exit())
     while True:
+        os.system('cls' if os.name == 'nt' else 'clear')
         menu.Show()
