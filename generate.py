@@ -9,6 +9,12 @@ import sqlparse
 
 init()
 
+def get_current_date():
+    """
+    Возвращает текущую дату в формате 'YYYY-MM-DD'.
+    """
+    return datetime.now().strftime("%Y-%m-%d")
+
 def colored_input(prompt, color=Color.LIGHTMAGENTA_EX):
     """
     Запрашивает у пользователя ввод строки, выводя prompt в заданном цвете.
@@ -20,9 +26,8 @@ def multi_input(prompt, color=Color.LIGHTMAGENTA_EX):
     """
     Выводит prompt (цветом color), затем считывает многострочный ввод пользователя
     до пустой строки. Каждую введённую строку обрабатывает через sqlparse:
-    - Приводит ключевые слова SQL к верхнему регистру,
-    - Не изменяет отступы (reindent=False).
-
+      - Приводит ключевые слова SQL к верхнему регистру,
+      - Не изменяет отступы (reindent=False).
     Возвращает объединённый текст введённых строк.
     """
     print(color + prompt + Color.RESET)
@@ -156,7 +161,6 @@ def add_task_request(folder):
     request_content = multi_input("Введите содержание запроса: ")
     
     with open(file_path, mode, encoding='utf-8') as f:
-        # Если файл уже существует и не пустой, вставляем пустую строку перед добавлением нового блока
         if mode == 'a' and os.path.getsize(file_path) > 0:
             f.write('\n')
         f.write(f'>ЗАПРОС {request_num}\n```sql\n{request_content}\n```\n')
@@ -195,7 +199,7 @@ def update_git():
         print("\n" + Color.MAGENTA + "git add ." + Color.LIGHTBLACK_EX)
         subprocess.run(["git", "add", "."], check=True)
 
-        commit_message = datetime.now().strftime('%Y-%m-%d')
+        commit_message = get_current_date()
         print(Color.MAGENTA + f"git commit -m '{commit_message}'" + Color.LIGHTBLACK_EX)
         subprocess.run(["git", "commit", "-m", commit_message], check=True)
 
@@ -216,11 +220,11 @@ def aggregate():
     exit()
 
 # Инициализируем меню, устанавливая в заголовок текущую дату
-menu = Menu(str(datetime.now().strftime("%Y-%m-%d")), True)
+menu = Menu(get_current_date(), True)
 
 if __name__ == "__main__":
     # Текущая папка по умолчанию — sql/<текущая_дата>
-    current_folder = os.path.join("sql", datetime.now().strftime("%Y-%m-%d"))
+    current_folder = os.path.join("sql", get_current_date())
 
     # Добавляем пункты меню
     menu.AddUpdateOption("Добавить запрос", lambda: add_task_request(current_folder))
