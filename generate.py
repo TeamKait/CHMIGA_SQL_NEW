@@ -6,6 +6,7 @@ import subprocess
 import re
 from menu import Menu
 import sqlparse
+import webbrowser
 
 init()
 
@@ -213,12 +214,11 @@ def update_git():
         exit()
 
 def aggregate():
-    """
-    Явно вызывает генерацию общего файла в текущей папке и завершает работу.
-    """
     generate_aggregate_file(current_folder)
     exit()
 
+def open_github():
+    webbrowser.open_new_tab("https://github.com/TeamKait/CHMIGA_SQL_NEW")
 # Инициализируем меню, устанавливая в заголовок текущую дату
 menu = Menu(get_current_date(), True)
 
@@ -232,6 +232,7 @@ if __name__ == "__main__":
     menu.AddUpdateOption("Создать общий файл", aggregate)
     menu.AddUpdateOption("Выбрать папку", select_folder)
     menu.AddUpdateOption("Обновить git", update_git)
+    menu.AddUpdateOption("Открыть github", open_github)
     menu.AddUpdateOption("Выйти", lambda: exit())
 
     # Основной цикл программы
