@@ -17,14 +17,19 @@ def get_current_date():
     """
     return datetime.now().strftime("%Y-%m-%d")
 
-def colored_input(prompt, color=Color.LIGHTMAGENTA_EX):
+menu = Menu(get_current_date(),
+            label_color=Color.RED,
+            option_color=Color.WHITE,
+            aux_color=Color.LIGHTBLACK_EX)
+
+def colored_input(prompt):
     """
     Запрашивает у пользователя ввод строки, выводя prompt в заданном цвете.
     Возвращает введённую строку.
     """
-    return input(color + prompt + Color.RESET)
+    return input(menu.option_color + prompt + Color.RESET)
 
-def multi_input(prompt, color=Color.LIGHTMAGENTA_EX):
+def multi_input(prompt):
     """
     Выводит prompt (цветом color), затем считывает многострочный ввод пользователя
     до пустой строки. Каждую введённую строку обрабатывает через sqlparse:
@@ -32,7 +37,7 @@ def multi_input(prompt, color=Color.LIGHTMAGENTA_EX):
       - Не изменяет отступы (reindent=False).
     Возвращает объединённый текст введённых строк.
     """
-    print(color + prompt + Color.RESET)
+    print(menu.option_color + prompt + Color.RESET)
     lines = []
     while True:
         line = sys.stdin.readline().rstrip('\n')
@@ -105,7 +110,7 @@ def generate_aggregate_file(folder):
     with open(aggregate_path, 'w', encoding='utf-8') as f:
         f.write(aggregate_content)
 
-    print(Color.CYAN + f'Общий файл обновлен: "{aggregate_path}"')
+    print(menu.aux_color + f'Общий файл обновлен: "{aggregate_path}"')
 
 def create_table_file(folder):
     """
@@ -120,10 +125,10 @@ def create_table_file(folder):
     if os.path.exists(file_path):
         choice = colored_input("Файл уже существует. Перезаписать? (0/1) ")
         if choice.strip() != '1':
-            print(Color.CYAN + "Создание таблицы отменено.")
+            print(menu.aux_color + "Создание таблицы отменено.")
             exit()
 
-    print(Color.CYAN + "\nПример кода для создания таблицы: SHOW CREATE TABLE имя_таблицы;")
+    print(menu.aux_color + "\nПример кода для создания таблицы: SHOW CREATE TABLE имя_таблицы;")
     create_code = multi_input("Введите код для создания таблицы: ")
     fill_code = multi_input("Введите код для заполнения таблицы: ")
 
@@ -135,7 +140,7 @@ def create_table_file(folder):
             f">ЗАПОЛНЕНИЕ ТАБЛИЦЫ {table_name}\n```sql\n{fill_code}\n```"
         )
     
-    print(Color.CYAN + f'Файл создания таблицы создан/обновлен: "{file_path}"')
+    print(menu.aux_color + f'Файл создания таблицы создан/обновлен: "{file_path}"')
     generate_aggregate_file(folder)
     exit()
 
@@ -167,7 +172,7 @@ def add_task_request(folder):
             f.write('\n')
         f.write(f'>ЗАПРОС {request_num}\n```sql\n{request_content}\n```\n')
     
-    print(Color.CYAN + f'Запрос добавлен в "{file_path}"')
+    print(menu.aux_color + f'Запрос добавлен в "{file_path}"')
     generate_aggregate_file(folder)
     exit()
 
@@ -192,23 +197,22 @@ def update_git():
     github_token = colored_input("Введите ваш GitHub-токен: ").strip()
 
     try:
-        # Замените URL на свой репозиторий, если нужно
         subprocess.run([
             "git", "remote", "set-url", "origin",
             f"https://{github_token}@github.com/TeamKait/CHMIGA_SQL_NEW.git"
         ], check=True)
 
-        print("\n" + Color.MAGENTA + "git add ." + Color.LIGHTBLACK_EX)
+        print("\n" + menu.option_color + "git add ." + Color.LIGHTBLACK_EX)
         subprocess.run(["git", "add", "."], check=True)
 
         commit_message = get_current_date()
-        print(Color.MAGENTA + f"git commit -m '{commit_message}'" + Color.LIGHTBLACK_EX)
+        print(menu.option_color + f"git commit -m '{commit_message}'" + Color.LIGHTBLACK_EX)
         subprocess.run(["git", "commit", "-m", commit_message], check=True)
 
-        print(Color.MAGENTA + "git push origin main" + Color.LIGHTBLACK_EX)
+        print(menu.option_color + "git push origin main" + Color.LIGHTBLACK_EX)
         subprocess.run(["git", "push", "origin", "main"], check=True)
 
-        print(Color.CYAN + "Git обновлён.")
+        print(menu.aux_color + "Git обновлён.")
         exit()
     except subprocess.CalledProcessError:
         print(Color.RED + "Ошибка при выполнении git команды. Проверьте введённый токен." + Color.RESET)
@@ -242,10 +246,6 @@ def set_colors():
     menu.label_color = colors[randint(0, len(colors) - 1)]
     menu.option_color = colors[randint(0, len(colors) - 1)]
     menu.aux_color = colors[randint(0, len(colors) - 1)]
-menu = Menu(get_current_date(),
-            label_color=Color.RED,
-            option_color=Color.WHITE,
-            aux_color=Color.LIGHTBLACK_EX)
 
 if __name__ == "__main__":
     # Текущая папка по умолчанию — sql/<текущая_дата>
