@@ -7,6 +7,7 @@ import re
 from menu import Menu
 import sqlparse
 import webbrowser
+from random import randint
 
 init()
 
@@ -220,22 +221,48 @@ def aggregate():
 def open_github():
     webbrowser.open_new_tab("https://github.com/TeamKait/CHMIGA_SQL_NEW")
 # Инициализируем меню, устанавливая в заголовок текущую дату
-menu = Menu(get_current_date(), True)
+colors = [
+    Color.BLUE,
+    Color.CYAN,
+    Color.GREEN,
+    Color.LIGHTBLACK_EX,
+    Color.LIGHTBLUE_EX,
+    Color.LIGHTCYAN_EX,
+    Color.LIGHTGREEN_EX,
+    Color.LIGHTMAGENTA_EX,
+    Color.LIGHTRED_EX,
+    Color.LIGHTWHITE_EX,
+    Color.LIGHTYELLOW_EX,
+    Color.MAGENTA,
+    Color.RED,
+    Color.WHITE,
+    Color.YELLOW
+]
+def set_colors():
+    menu.label_color = colors[randint(0, len(colors) - 1)]
+    menu.option_color = colors[randint(0, len(colors) - 1)]
+    menu.aux_color = colors[randint(0, len(colors) - 1)]
+menu = Menu(get_current_date(),
+            label_color=Color.RED,
+            option_color=Color.WHITE,
+            aux_color=Color.LIGHTBLACK_EX)
 
 if __name__ == "__main__":
     # Текущая папка по умолчанию — sql/<текущая_дата>
     current_folder = os.path.join("sql", get_current_date())
 
     # Добавляем пункты меню
-    menu.AddUpdateOption("Добавить запрос", lambda: add_task_request(current_folder))
-    menu.AddUpdateOption("Создать/обновить таблицу", lambda: create_table_file(current_folder))
-    menu.AddUpdateOption("Создать общий файл", aggregate)
-    menu.AddUpdateOption("Выбрать папку", select_folder)
-    menu.AddUpdateOption("Обновить git", update_git)
-    menu.AddUpdateOption("Открыть github", open_github)
-    menu.AddUpdateOption("Выйти", lambda: exit())
+    sql_folder = menu.set_folder("SQL")
+    menu.add_option("Добавить запрос", lambda: add_task_request(current_folder), sql_folder)
+    menu.add_option("Создать & заполнить таблицу", lambda: create_table_file(current_folder), sql_folder)
+    menu.add_option("Создать общий файл", lambda: aggregate, sql_folder)
+    menu.add_option("Выбрать папку", select_folder)
+    git_folder = menu.set_folder("GIT")
+    menu.add_option("Обновить git", update_git, git_folder)
+    menu.add_option("Открыть github", open_github, git_folder)
+    menu.add_separator()
+    menu.add_option("Сменить цвет", set_colors)
 
     # Основной цикл программы
     while True:
-        os.system('cls' if os.name == 'nt' else 'clear')
-        menu.Show()
+        menu.show()
