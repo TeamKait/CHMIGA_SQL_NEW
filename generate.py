@@ -194,13 +194,13 @@ def update_git():
     добавляет изменения, коммитит с датой и пушит в ветку main.
     При ошибке (неверный токен или проблемы с сетью) выводит сообщение об ошибке.
     """
-    # github_token = colored_input("Введите ваш GitHub-токен: ").strip()
+    github_token = colored_input("Введите ваш GitHub-токен: ").strip()
 
     try:
-        # subprocess.run([
-        #     "git", "remote", "set-url", "origin",
-        #     f"https://{github_token}@github.com/TeamKait/CHMIGA_SQL_NEW.git"
-        # ], check=True)
+        subprocess.run([
+            "git", "remote", "set-url", "origin",
+            f"https://{github_token}@github.com/TeamKait/CHMIGA_SQL_NEW.git"
+        ], check=True)
 
         print("\n" + menu.option_color + "git add ." + Color.LIGHTBLACK_EX)
         subprocess.run(["git", "add", "."], check=True)
