@@ -255,7 +255,7 @@ if __name__ == "__main__":
     sql_folder = menu.set_folder("SQL")
     menu.add_option("Добавить запрос", lambda: add_task_request(current_folder), sql_folder)
     menu.add_option("Создать & заполнить таблицу", lambda: create_table_file(current_folder), sql_folder)
-    menu.add_option("Создать общий файл", lambda: aggregate, sql_folder)
+    menu.add_option("Создать общий файл", lambda: aggregate(), sql_folder)
     menu.add_option("Выбрать папку", select_folder)
     git_folder = menu.set_folder("GIT")
     menu.add_option("Обновить git", update_git, git_folder)
