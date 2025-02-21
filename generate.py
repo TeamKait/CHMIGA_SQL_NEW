@@ -19,8 +19,8 @@ def get_current_date():
 
 menu = Menu(get_current_date(),
             label_color=Color.RED,
-            option_color=Color.WHITE,
-            aux_color=Color.LIGHTBLACK_EX)
+            option_color=Color.LIGHTMAGENTA_EX,
+            aux_color=Color.CYAN)
 
 def colored_input(prompt):
     """
@@ -186,7 +186,7 @@ def select_folder():
     current_folder = os.path.join("sql", folder_name)
     ensure_folder_exists(current_folder)
     os.system('cls' if os.name == 'nt' else 'clear')
-    menu.SetLabel(folder_name)
+    menu.set_label(folder_name)
 
 def update_git():
     """

@@ -178,7 +178,7 @@ class Menu:
                         selectable[number] = item
 
             recursive_print(self.__items__, "", 0)
-            selection = input(f"\n{self.aux_color}Select an option: {Color.RESET}")
+            selection = input(f"\n{self.aux_color}Выбор: {Color.RESET}")
             if selection in selectable:
                 chosen_option = selectable[selection]
                 self.__clear_console__()
