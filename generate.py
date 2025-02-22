@@ -274,5 +274,5 @@ if __name__ == "__main__":
     menu.add_separator()
     menu.add_option("Сменить цвет", set_colors)
 
-    # Вызов меню (при выборе пункта программа завершает работу, как и было)
-    menu.show()
+    while True:
+        menu.show()
