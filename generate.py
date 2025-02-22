@@ -9,7 +9,14 @@ import sqlparse
 import webbrowser
 from random import randint
 
+try:
+    import keyring
+except ImportError:
+    keyring = None  # Если keyring не установлен, будет использовано обычное поведение
+
 init()
+
+SERVICE_NAME = "CHMIGA_SQL_NEW"  # Имя сервиса для хранения токена
 
 def get_current_date():
     """
@@ -43,10 +50,7 @@ def multi_input(prompt):
         line = sys.stdin.readline().rstrip('\n')
         if not line:
             break
-        # Форматируем каждую строку с помощью sqlparse
-        lines.append(
-            sqlparse.format(line, keyword_case="upper", reindent=False, encoding="utf-8")
-        )
+        lines.append(sqlparse.format(line, keyword_case="upper", reindent=False, encoding="utf-8"))
     return '\n'.join(lines)
 
 def ensure_folder_exists(folder):
@@ -79,26 +83,19 @@ def generate_aggregate_file(folder):
     aggregate_path = os.path.join(folder, "~Общий файл.md")
     aggregate_content = ""
 
-    # Добавляем блок создания таблицы, если существует
     structure_file = os.path.join(folder, "Создание таблицы.md")
     if os.path.exists(structure_file):
         with open(structure_file, 'r', encoding='utf-8') as f:
             content = f.read()
         aggregate_content += "# Создание таблицы\n\n" + content + "\n\n"
 
-    # Ищем все задания
-    task_files = [
-        f for f in os.listdir(folder)
-        if f.startswith("Задание") and f.endswith(".md")
-    ]
+    task_files = [f for f in os.listdir(folder) if f.startswith("Задание") and f.endswith(".md")]
 
-    # Сортируем файлы "Задание #x" по номеру x
     def extract_task_number(filename):
         m = re.search(r'Задание\s*#\s*(\d+)', filename)
         return int(m.group(1)) if m else 0
     task_files.sort(key=extract_task_number)
 
-    # Добавляем блок запросов
     if task_files:
         aggregate_content += "# Запросы\n\n"
         for task_file in task_files:
@@ -117,7 +114,7 @@ def create_table_file(folder):
     Создаёт или перезаписывает файл "Создание таблицы.md" в папке folder.
     Запрашивает у пользователя SQL-код для создания и заполнения таблицы,
     добавляет название таблицы в заголовки.
-    После создания файла обновляет общий файл и завершает работу (exit()).
+    После создания файла обновляет общий файл и завершает работу.
     """
     ensure_folder_exists(folder)
     file_path = os.path.join(folder, "Создание таблицы.md")
@@ -148,7 +145,7 @@ def add_task_request(folder):
     """
     Добавляет (или перезаписывает) запрос в файл "Задание #<номер>.md".
     Если файл существует и выбран режим 'добавить', увеличивает счётчик запросов.
-    После записи файла обновляет общий файл и завершает работу (exit()).
+    После записи файла обновляет общий файл и завершает работу.
     """
     ensure_folder_exists(folder)
     task_number = colored_input("Введите номер задания: ").strip()
@@ -188,23 +185,25 @@ def select_folder():
     os.system('cls' if os.name == 'nt' else 'clear')
     menu.set_label(folder_name)
 
-# Глобальная переменная для хранения GitHub-токена
-github_token = None
-
 def get_github_token():
     """
-    Возвращает сохранённый GitHub-токен. Если токен не задан, запрашивает его у пользователя.
+    Пытается получить сохранённый GitHub-токен из системного хранилища.
+    Если токен не найден, запрашивает его у пользователя и сохраняет в keyring.
     """
-    global github_token
-    if github_token is None:
-        github_token = colored_input("Введите ваш GitHub-токен: ").strip()
-    return github_token
+    token = None
+    if keyring:
+        token = keyring.get_password(SERVICE_NAME, "github_token")
+    if not token:
+        token = colored_input("Введите ваш GitHub-токен: ").strip()
+        if keyring:
+            keyring.set_password(SERVICE_NAME, "github_token", token)
+    return token
 
 def update_git():
     """
-    Обновляет remote-URL репозитория с использованием ранее введённого GitHub-токена,
+    Обновляет remote-URL репозитория с использованием сохранённого GitHub-токена,
     добавляет изменения, коммитит с датой и пушит в ветку main.
-    При ошибке (неверный токен или проблемы с сетью) выводит сообщение об ошибке.
+    При ошибке выводит сообщение и завершает работу.
     """
     token = get_github_token()
     try:
@@ -275,6 +274,5 @@ if __name__ == "__main__":
     menu.add_separator()
     menu.add_option("Сменить цвет", set_colors)
 
-    # Основной цикл программы
-    while True:
-        menu.show()
+    # Вызов меню (при выборе пункта программа завершает работу, как и было)
+    menu.show()
