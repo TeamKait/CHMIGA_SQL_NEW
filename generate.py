@@ -12,16 +12,15 @@ from random import randint
 try:
     import keyring
 except ImportError:
-    keyring = None  # Если keyring не установлен, будет использовано обычное поведение
+    keyring = None  # Если keyring не установлен, токен не будет сохраняться между запусками
 
 init()
 
-SERVICE_NAME = "CHMIGA_SQL_NEW"  # Имя сервиса для хранения токена
+SERVICE_NAME = "CHMIGA_SQL_NEW"  # Имя сервиса для keyring
+TOKEN_KEY = "github_token"
 
 def get_current_date():
-    """
-    Возвращает текущую дату в формате 'YYYY-MM-DD'.
-    """
+    """Возвращает текущую дату в формате 'YYYY-MM-DD'."""
     return datetime.now().strftime("%Y-%m-%d")
 
 menu = Menu(get_current_date(),
@@ -30,19 +29,13 @@ menu = Menu(get_current_date(),
             aux_color=Color.CYAN)
 
 def colored_input(prompt):
-    """
-    Запрашивает у пользователя ввод строки, выводя prompt в заданном цвете.
-    Возвращает введённую строку.
-    """
+    """Запрашивает ввод, выводя prompt в заданном цвете."""
     return input(menu.option_color + prompt + Color.RESET)
 
 def multi_input(prompt):
     """
-    Выводит prompt (цветом option_color), затем считывает многострочный ввод пользователя
-    до пустой строки. Каждую введённую строку обрабатывает через sqlparse:
-      - Приводит ключевые слова SQL к верхнему регистру,
-      - Не изменяет отступы (reindent=False).
-    Возвращает объединённый текст введённых строк.
+    Считывает многострочный ввод пользователя до пустой строки.
+    Каждая строка форматируется через sqlparse (ключевые слова переводятся в верхний регистр).
     """
     print(menu.option_color + prompt + Color.RESET)
     lines = []
@@ -54,17 +47,14 @@ def multi_input(prompt):
     return '\n'.join(lines)
 
 def ensure_folder_exists(folder):
-    """
-    Проверяет существование указанной папки. Если папки нет, создаёт её.
-    """
+    """Создаёт папку, если её нет."""
     if not os.path.exists(folder):
         os.makedirs(folder)
 
 def extract_table_name(sql_code):
     """
-    Извлекает имя таблицы из SQL-кода, используя регулярное выражение,
-    ищущее шаблон CREATE TABLE [IF NOT EXISTS] `имя`.
-    Если имя не найдено, возвращает 'таблица'.
+    Извлекает имя таблицы из SQL-кода.
+    Ищет шаблон CREATE TABLE [IF NOT EXISTS] `имя`.
     """
     pattern = re.compile(r"create\s+table\s+(if\s+not\s+exists\s+)?[`'\"]?(\w+)[`'\"]?", re.IGNORECASE)
     match = pattern.search(sql_code)
@@ -74,10 +64,9 @@ def extract_table_name(sql_code):
 
 def generate_aggregate_file(folder):
     """
-    Генерирует общий файл (~Общий файл.md) в указанной папке:
-      - Если существует файл "Создание таблицы.md", добавляет его содержимое.
-      - Ищет все файлы "Задание #<номер>.md", сортирует их по номеру
-        и добавляет в общий файл.
+    Генерирует общий файл (~Общий файл.md) в папке:
+      – если есть файл "Создание таблицы.md" – добавляет его,
+      – затем добавляет все файлы "Задание #<номер>.md" (отсортированные по номеру).
     """
     ensure_folder_exists(folder)
     aggregate_path = os.path.join(folder, "~Общий файл.md")
@@ -111,10 +100,10 @@ def generate_aggregate_file(folder):
 
 def create_table_file(folder):
     """
-    Создаёт или перезаписывает файл "Создание таблицы.md" в папке folder.
-    Запрашивает у пользователя SQL-код для создания и заполнения таблицы,
-    добавляет название таблицы в заголовки.
-    После создания файла обновляет общий файл и завершает работу.
+    Создаёт (или перезаписывает) файл "Создание таблицы.md":
+      – запрашивает у пользователя SQL-код создания и заполнения таблицы,
+      – добавляет название таблицы в заголовки,
+      – обновляет общий файл и завершает работу.
     """
     ensure_folder_exists(folder)
     file_path = os.path.join(folder, "Создание таблицы.md")
@@ -143,9 +132,9 @@ def create_table_file(folder):
 
 def add_task_request(folder):
     """
-    Добавляет (или перезаписывает) запрос в файл "Задание #<номер>.md".
-    Если файл существует и выбран режим 'добавить', увеличивает счётчик запросов.
-    После записи файла обновляет общий файл и завершает работу.
+    Добавляет запрос в файл "Задание #<номер>.md":
+      – если файл существует, предлагает добавить запрос или перезаписать,
+      – обновляет общий файл и завершает работу.
     """
     ensure_folder_exists(folder)
     task_number = colored_input("Введите номер задания: ").strip()
@@ -175,8 +164,7 @@ def add_task_request(folder):
 
 def select_folder():
     """
-    Запрашивает у пользователя название папки, формирует путь вида 'sql/<папка>',
-    переключается на неё и обновляет заголовок меню.
+    Запрашивает название папки, формирует путь sql/<папка> и обновляет заголовок меню.
     """
     global current_folder
     folder_name = colored_input("Введите название папки: ").strip()
@@ -187,22 +175,25 @@ def select_folder():
 
 def get_github_token():
     """
-    Пытается получить сохранённый GitHub-токен из системного хранилища.
-    Если токен не найден, запрашивает его у пользователя и сохраняет в keyring.
+    Пытается получить сохранённый GitHub‑токен из keyring.
+    Если токен не найден или keyring недоступен, запрашивает его у пользователя.
+    Токен обрезается (strip) от лишних пробелов.
     """
     token = None
     if keyring:
-        token = keyring.get_password(SERVICE_NAME, "github_token")
+        token = keyring.get_password(SERVICE_NAME, TOKEN_KEY)
     if not token:
         token = colored_input("Введите ваш GitHub-токен: ").strip()
         if keyring:
-            keyring.set_password(SERVICE_NAME, "github_token", token)
+            keyring.set_password(SERVICE_NAME, TOKEN_KEY, token)
+    else:
+        token = token.strip()
     return token
 
 def update_git():
     """
-    Обновляет remote-URL репозитория с использованием сохранённого GitHub-токена,
-    добавляет изменения, коммитит с датой и пушит в ветку main.
+    Обновляет remote-URL репозитория с использованием сохранённого GitHub‑токена,
+    затем выполняет git add, commit (с текущей датой) и push.
     При ошибке выводит сообщение и завершает работу.
     """
     token = get_github_token()
@@ -259,7 +250,7 @@ def set_colors():
     menu.aux_color = colors[randint(0, len(colors) - 1)]
 
 if __name__ == "__main__":
-    # Текущая папка по умолчанию — sql/<текущая_дата>
+    # Текущая папка по умолчанию: sql/<текущая_дата>
     current_folder = os.path.join("sql", get_current_date())
 
     # Добавляем пункты меню
@@ -274,5 +265,5 @@ if __name__ == "__main__":
     menu.add_separator()
     menu.add_option("Сменить цвет", set_colors)
 
-    while True:
-        menu.show()
+    # Вызов меню (программа завершает работу после выполнения выбранной операции)
+    menu.show()
