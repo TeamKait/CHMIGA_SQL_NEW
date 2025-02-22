@@ -266,4 +266,5 @@ if __name__ == "__main__":
     menu.add_option("Сменить цвет", set_colors)
 
     # Вызов меню (программа завершает работу после выполнения выбранной операции)
-    menu.show()
+    while True:
+        menu.show()
