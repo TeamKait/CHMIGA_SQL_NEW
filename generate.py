@@ -31,7 +31,7 @@ def colored_input(prompt):
 
 def multi_input(prompt):
     """
-    Выводит prompt (цветом color), затем считывает многострочный ввод пользователя
+    Выводит prompt (цветом option_color), затем считывает многострочный ввод пользователя
     до пустой строки. Каждую введённую строку обрабатывает через sqlparse:
       - Приводит ключевые слова SQL к верхнему регистру,
       - Не изменяет отступы (reindent=False).
@@ -188,18 +188,29 @@ def select_folder():
     os.system('cls' if os.name == 'nt' else 'clear')
     menu.set_label(folder_name)
 
+# Глобальная переменная для хранения GitHub-токена
+github_token = None
+
+def get_github_token():
+    """
+    Возвращает сохранённый GitHub-токен. Если токен не задан, запрашивает его у пользователя.
+    """
+    global github_token
+    if github_token is None:
+        github_token = colored_input("Введите ваш GitHub-токен: ").strip()
+    return github_token
+
 def update_git():
     """
-    Запрашивает у пользователя GitHub-токен, обновляет remote-URL репозитория,
+    Обновляет remote-URL репозитория с использованием ранее введённого GitHub-токена,
     добавляет изменения, коммитит с датой и пушит в ветку main.
     При ошибке (неверный токен или проблемы с сетью) выводит сообщение об ошибке.
     """
-    github_token = colored_input("Введите ваш GitHub-токен: ").strip()
-
+    token = get_github_token()
     try:
         subprocess.run([
             "git", "remote", "set-url", "origin",
-            f"https://{github_token}@github.com/TeamKait/CHMIGA_SQL_NEW.git"
+            f"https://{token}@github.com/TeamKait/CHMIGA_SQL_NEW.git"
         ], check=True)
 
         print("\n" + menu.option_color + "git add ." + Color.LIGHTBLACK_EX)
@@ -224,7 +235,7 @@ def aggregate():
 
 def open_github():
     webbrowser.open_new_tab("https://github.com/TeamKait/CHMIGA_SQL_NEW")
-# Инициализируем меню, устанавливая в заголовок текущую дату
+
 colors = [
     Color.BLUE,
     Color.CYAN,
@@ -242,6 +253,7 @@ colors = [
     Color.WHITE,
     Color.YELLOW
 ]
+
 def set_colors():
     menu.label_color = colors[randint(0, len(colors) - 1)]
     menu.option_color = colors[randint(0, len(colors) - 1)]
